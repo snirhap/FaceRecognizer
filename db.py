@@ -1,4 +1,4 @@
-from pymongo import database, MongoClient, collection
+from pymongo import MongoClient, database, collection
 
 
 class MongoDBHandler:

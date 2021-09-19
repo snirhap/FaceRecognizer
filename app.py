@@ -1,7 +1,6 @@
 from queue import Queue
 from threading import Thread
-from faker import Faker
-from numpy import dot, linalg, random
+from numpy import dot, linalg
 from flask import Flask, request, jsonify
 from flask_api import status
 from db import MongoDBHandler
@@ -30,6 +29,25 @@ def get_closest_match():
             return jsonify(top_matches)
         else:
             return f'Invalid input, {message}', status.HTTP_400_BAD_REQUEST
+    else:
+        return 'No input'
+
+
+@app.route('/add', methods=['POST'])
+def add_one_person():
+    input_data = request.get_json()
+    if db_handler.count_documents_in_collection(configs["persons_collection_name"]) > configs["max_records_in_collection"]:
+        return f'persons collection has reached its maximum capacity of {configs["max_records_in_collection"]} records', \
+               status.HTTP_500_INTERNAL_SERVER_ERROR
+
+    message, status_code = add_person_input_validation(input_data)
+    if status_code == status.HTTP_200_OK:
+        db_handler.insert_one_to_collection(configs["persons_collection_name"],
+                                            {"person_name": input_data.get('person_name'),
+                                             "features": [round(feature, configs["feature_proximity"]) for feature in input_data.get('features')]})
+        return f"{status_code}: {input_data.get('person_name')} was added to DB", status.HTTP_201_CREATED
+    else:
+        return f"{status_code}: could not add to DB - {message}", status_code
 
 
 def get_most_similar_persons(query_vector: list, collection_vectors: list):
@@ -67,23 +85,6 @@ def get_features_similarity_between_two_vectors(first_vector: list, second_vecto
     # Calculate cosine similarity between 2 features vector
     dot_prod = dot(first_vector, second_vector)
     return round(dot_prod / (linalg.norm(first_vector) * linalg.norm(second_vector)), configs["feature_proximity"])
-
-
-@app.route('/add', methods=['POST'])
-def add_one_person():
-    input_data = request.get_json()
-    if db_handler.count_documents_in_collection(configs["persons_collection_name"]) > configs["max_records_in_collection"]:
-        return f'persons collection has reached its maximum capacity of {configs["max_records_in_collection"]} records', \
-               status.HTTP_500_INTERNAL_SERVER_ERROR
-
-    message, status_code = add_person_input_validation(input_data)
-    if status_code == status.HTTP_200_OK:
-        db_handler.insert_one_to_collection(configs["persons_collection_name"],
-                                            {"person_name": input_data.get('person_name'),
-                                             "features": [round(feature, configs["feature_proximity"]) for feature in input_data.get('features')]})
-        return f"{status_code}: {input_data.get('person_name')} was added to DB", status.HTTP_201_CREATED
-    else:
-        return f"{status_code}: could not add to DB - {message}", status_code
 
 
 def get_person_input_validation(input_data):
@@ -140,4 +141,4 @@ if __name__ == '__main__':
     # db_handler.truncate_collection(configs["persons_collection_name"])
     # db_filler = DbFiller(db_handler)
     # db_filler.fill_db()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True, port=configs["port"])
