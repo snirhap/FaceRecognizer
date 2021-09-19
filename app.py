@@ -3,7 +3,7 @@ from threading import Thread
 from numpy import dot, linalg
 from flask import Flask, request, jsonify
 from flask_api import status
-from db import MongoDBHandler
+from db import MongoDBHandler, cursor
 from json import load
 
 
@@ -25,7 +25,10 @@ def get_closest_match():
         message, status_code = get_person_input_validation(input_data)
         if status_code == status.HTTP_200_OK:
             features = request.get_json()["features"]
-            top_matches = get_most_similar_persons(features, list(db_handler.find_in_collection(configs["persons_collection_name"])))
+            app.logger.info('before cursor')
+            db_cursor = db_handler.find_in_collection(configs["persons_collection_name"])
+            app.logger.info('after cursor')
+            top_matches = get_most_similar_persons(features, db_cursor)
             return jsonify(top_matches)
         else:
             return f'Invalid input, {message}', status.HTTP_400_BAD_REQUEST
@@ -50,22 +53,26 @@ def add_one_person():
         return f"{status_code}: could not add to DB - {message}", status_code
 
 
-def get_most_similar_persons(query_vector: list, collection_vectors: list):
+def get_most_similar_persons(query_vector: list, db_cursor: cursor):
     workers = list()
     processed_results = list()
     queue_to_process = Queue()
 
     # Fill queue with all persons
-    for element in collection_vectors:
+    app.logger.info(f'Before adding to queue')
+    for element in db_cursor:
         queue_to_process.put(element)
+    app.logger.info(f'After adding to queue')
 
     for i in range(configs["number_of_threads"]):
         worker = Thread(target=process_queue_elements, args=(queue_to_process, query_vector, processed_results))
         workers.append(worker)
         worker.start()
+        app.logger.info(f'{worker} started')
 
     for worker in workers:
         worker.join()
+        app.logger.info(f'{worker} finished')
 
     return get_top_matches(processed_results)
 
@@ -124,17 +131,6 @@ def add_person_input_validation(input_data):
 
 def get_top_matches(compare):
     return sorted(compare, key=lambda k: k['result'], reverse=True)[:configs["desired_top_matches"]]
-
-
-# def fill_db(self, collection_name: str, number_of_records: int):
-#     fake = Faker()
-#     fake_persons = [{"person_name": fake.name(), "features": self.vector_generator()} for _ in range(number_of_records)]
-#     print(fake_persons)
-#     # self.db_handler.get_collection(collection_name).insert_many(fake_persons)
-#
-#
-# def vector_generator():
-#     return [round(feature, configs.get("feature_proximity")) for feature in random.rand(configs.get("number_of_features")).tolist()]
 
 
 if __name__ == '__main__':

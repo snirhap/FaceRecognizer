@@ -1,4 +1,4 @@
-from pymongo import MongoClient, database, collection
+from pymongo import MongoClient, database, collection, cursor
 
 
 class MongoDBHandler:
@@ -13,7 +13,7 @@ class MongoDBHandler:
     def insert_one_to_collection(self, collection_name: str, data: dict):
         self.get_collection(collection_name).insert_one(data)
 
-    def find_in_collection(self, collection_name: str, filter_dict: dict = None):
+    def find_in_collection(self, collection_name: str, filter_dict: dict = None) -> cursor:
         if not filter_dict:
             filter_dict = {}
         return self.get_collection(collection_name).find(filter_dict)
