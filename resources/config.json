@@ -5,6 +5,9 @@
   "number_of_threads": 10,
   "max_records_in_collection": 10000,
   "persons_collection_name": "persons",
+  "person_name_column": "person_name",
+  "person_features_column": "features",
   "db_name": "DB",
-  "port": 5000
+  "port": 5000,
+  "result_field": "result"
 }

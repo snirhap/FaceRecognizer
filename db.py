@@ -1,10 +1,11 @@
 from pymongo import MongoClient, database, collection, cursor
+import os
 
 
 class MongoDBHandler:
     def __init__(self, database_name: str):
-        self.mongo = MongoClient('mongodb+srv://admin:KpGbKaygcFlKoDRJ@facerecognition.3mbw1.mongodb.net/DB?retryWrites=true&w=majority',
-                                 maxPoolSize=50, connect=False)
+        self.mongo = MongoClient('mongodb+srv://admin:KpGbKaygcFlKoDRJ@facerecognition.3mbw1.mongodb.net/DB?retryWrites=true&w=majority', maxPoolSize=50, connect=False)
+        # self.mongo = MongoClient(os.getenv('MONGO_CONNECTION_STRING'), maxPoolSize=50, connect=False)
         self.db = database.Database(self.mongo, database_name)
 
     def get_collection(self, collection_name: str):
@@ -13,7 +14,7 @@ class MongoDBHandler:
     def insert_one_to_collection(self, collection_name: str, data: dict):
         self.get_collection(collection_name).insert_one(data)
 
-    def find_in_collection(self, collection_name: str, filter_dict: dict = None) -> cursor:
+    def find_in_collection(self, collection_name: str, filter_dict: dict = None):
         if not filter_dict:
             filter_dict = {}
         return self.get_collection(collection_name).find(filter_dict)
@@ -25,3 +26,6 @@ class MongoDBHandler:
 
     def truncate_collection(self, collection_name: str):
         self.get_collection(collection_name).delete_many({})
+
+
+# 'mongodb+srv://admin:KpGbKaygcFlKoDRJ@facerecognition.3mbw1.mongodb.net/DB?retryWrites=true&w=majority'
