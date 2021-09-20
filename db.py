@@ -1,11 +1,10 @@
-from pymongo import MongoClient, database, collection, cursor
+from pymongo import MongoClient, database, collection
 import os
 
 
 class MongoDBHandler:
     def __init__(self, database_name: str):
-        self.mongo = MongoClient('mongodb+srv://admin:KpGbKaygcFlKoDRJ@facerecognition.3mbw1.mongodb.net/DB?retryWrites=true&w=majority', maxPoolSize=50, connect=False)
-        # self.mongo = MongoClient(os.getenv('MONGO_CONNECTION_STRING'), maxPoolSize=50, connect=False)
+        self.mongo = MongoClient(os.getenv('MONGO_CONNECTION_STRING'), maxPoolSize=50, connect=False)
         self.db = database.Database(self.mongo, database_name)
 
     def get_collection(self, collection_name: str):
@@ -26,6 +25,3 @@ class MongoDBHandler:
 
     def truncate_collection(self, collection_name: str):
         self.get_collection(collection_name).delete_many({})
-
-
-# 'mongodb+srv://admin:KpGbKaygcFlKoDRJ@facerecognition.3mbw1.mongodb.net/DB?retryWrites=true&w=majority'
