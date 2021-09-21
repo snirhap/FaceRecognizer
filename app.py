@@ -1,10 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_api import status
 
-import config
-import logics
-import validation
-from exceptions import DuplicateDocument, MaximumDocumentsInCollection
+from modules import logics, validation, config
+from modules.exceptions import DuplicateDocumentError, MaximumDocumentsInCollectionError
 
 app = Flask(__name__)
 
@@ -32,9 +30,9 @@ def add_one_person():
         validation.add_person_input_validation(input_data)
         logics.insert_document_to_persons_collection(input_data=input_data)
         return f'{input_data.get(config.PERSON_NAME_COLUMN)} was added to {config.PERSONS_COLLECTION_NAME}', status.HTTP_201_CREATED
-    except DuplicateDocument as error:
+    except DuplicateDocumentError as error:
         return f'Error adding new person: {error}', status.HTTP_400_BAD_REQUEST
-    except MaximumDocumentsInCollection as error:
+    except MaximumDocumentsInCollectionError as error:
         return f'Error adding new person: {error}', status.HTTP_400_BAD_REQUEST
     except KeyError as error:
         return f'Missing key {error}', status.HTTP_400_BAD_REQUEST
