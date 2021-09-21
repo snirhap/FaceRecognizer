@@ -66,8 +66,8 @@ All validations implementation are located in modules/validation.py
 
 2. User scripts
 There are 2 scripts which simulate requests of POST and GET to the server:
-1. add_10_persons.py - genearates data for 10 persons (name and features vector) and adds them to persons collection in the DB.
-2. add_and_search_10_persons.py - adds 10 persons to persons collection and then search for each of one of them their closest matches.
+  1. add_10_persons.py - genearates data for 10 persons (name and features vector) and adds them to persons collection in the DB.
+  2. add_and_search_10_persons.py - adds 10 persons to persons collection and then search for each of one of them their closest matches.
 
 You can run them when server is up using:
 ```
