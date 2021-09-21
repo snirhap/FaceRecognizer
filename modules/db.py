@@ -1,10 +1,12 @@
 from pymongo import MongoClient, database, collection
 import os
 
+MONGO_CONNECTION_STRING_PARAMETER = 'MONGO_CONNECTION_STRING'
+
 
 class MongoDBHandler:
     def __init__(self, database_name: str):
-        self.mongo = MongoClient(os.getenv('MONGO_CONNECTION_STRING'), maxPoolSize=50)
+        self.mongo = MongoClient(os.getenv(MONGO_CONNECTION_STRING_PARAMETER), maxPoolSize=50)
         self.db = database.Database(self.mongo, database_name)
 
     def get_collection(self, collection_name: str):

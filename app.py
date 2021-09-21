@@ -43,4 +43,4 @@ def add_one_person():
 
 
 if __name__ == '__main__':
-    app.run(host=config.SERVER_IP, debug=True, port=config.SERVER_PORT)
+    app.run(host=config.SERVER_IP, port=config.SERVER_PORT)

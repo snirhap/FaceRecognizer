@@ -1,16 +1,18 @@
-import logging
+import os
 from queue import Queue
 from threading import Thread
 
 from numpy import dot, linalg
 
+from logger import Logger, DEFAULT_LOG_LEVEL
 from modules import config
 from modules.db import MongoDBHandler
 from modules.exceptions import DuplicateDocumentError, MaximumDocumentsInCollectionError
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG,
-                    format='[%(asctime)s %(levelname)s] %(threadName)s : %(message)s')
+LOG_LEVEL_PARAMETER = 'LOG_LEVEL_PARAMETER'
+
+
+logger = Logger(level=os.getenv(LOG_LEVEL_PARAMETER, DEFAULT_LOG_LEVEL)).get_logger()
 db_handler = MongoDBHandler(config.DB_NAME)
 
 
