@@ -1,6 +1,4 @@
-FROM ubuntu:latest
-
-RUN apt-get update -y && apt-get install -y python3-pip
+FROM python:3.9.7-slim
 
 WORKDIR /app
 
