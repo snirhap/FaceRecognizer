@@ -4,7 +4,7 @@ import os
 
 class MongoDBHandler:
     def __init__(self, database_name: str):
-        self.mongo = MongoClient(os.getenv('MONGO_CONNECTION_STRING'), maxPoolSize=50, connect=False)
+        self.mongo = MongoClient(os.getenv('MONGO_CONNECTION_STRING'), maxPoolSize=50)
         self.db = database.Database(self.mongo, database_name)
 
     def get_collection(self, collection_name: str):

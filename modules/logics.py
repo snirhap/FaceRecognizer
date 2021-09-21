@@ -4,9 +4,9 @@ from threading import Thread
 
 from numpy import dot, linalg
 
-import config
-from db import MongoDBHandler
-from exceptions import DuplicateDocument, MaximumDocumentsInCollection
+from modules import config
+from modules.db import MongoDBHandler
+from modules.exceptions import DuplicateDocumentError, MaximumDocumentsInCollectionError
 
 logger = getLogger(__name__)
 db_handler = MongoDBHandler(config.DB_NAME)
@@ -51,12 +51,12 @@ def get_features_similarity_between_two_vectors(first_vector: list, second_vecto
 
 def is_person_already_exists(person_name: str):
     if db_handler.count_documents_in_collection(config.PERSONS_COLLECTION_NAME, {config.PERSON_NAME_COLUMN: person_name}) > 0:
-        raise DuplicateDocument(f'{person_name} already in {config.PERSONS_COLLECTION_NAME}')
+        raise DuplicateDocumentError(f'{person_name} already in {config.PERSONS_COLLECTION_NAME}')
 
 
 def has_collection_exceeded_maximum_documents(collection_name: str):
     if db_handler.count_documents_in_collection(collection_name) >= config.MAX_RECORDS_IN_COLLECTION:
-        raise MaximumDocumentsInCollection(f'{collection_name} collection has reached its maximum capacity ({config.MAX_RECORDS_IN_COLLECTION})'
+        raise MaximumDocumentsInCollectionError(f'{collection_name} collection has reached its maximum capacity ({config.MAX_RECORDS_IN_COLLECTION})'
                                            f'{config.MAX_RECORDS_IN_COLLECTION} records')
 
 

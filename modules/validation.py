@@ -1,4 +1,4 @@
-import config
+from modules import config
 
 
 def add_person_input_validation(input_data: dict):
