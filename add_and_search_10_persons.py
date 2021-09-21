@@ -4,7 +4,7 @@ from numpy import random
 
 from modules import config
 
-IP = "0.0.0.0:5000"
+IP = f'{config.SERVER_IP}:{config.SERVER_PORT}'
 NUMBER_OF_RECORDS = 10
 fake = Faker()
 

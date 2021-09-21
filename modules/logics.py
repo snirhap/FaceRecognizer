@@ -1,4 +1,4 @@
-from logging import getLogger
+import logging
 from queue import Queue
 from threading import Thread
 
@@ -8,7 +8,9 @@ from modules import config
 from modules.db import MongoDBHandler
 from modules.exceptions import DuplicateDocumentError, MaximumDocumentsInCollectionError
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG,
+                    format='[%(asctime)s %(levelname)s] %(threadName)s : %(message)s')
 db_handler = MongoDBHandler(config.DB_NAME)
 
 
@@ -18,17 +20,22 @@ def get_most_similar_persons(query_vector: list):
     queue_to_process = Queue()
 
     # Fill queue with all persons
+    logger.info('Getting all records from document')
     for element in db_handler.find_in_collection(config.PERSONS_COLLECTION_NAME):
         queue_to_process.put(element)
 
+    logger.info('Calculate vector similarity of query vector vs all records from document')
     for i in range(config.NUMBER_OF_THREADS):
         worker = Thread(target=process_queue_elements, args=(queue_to_process, query_vector, processed_results))
         workers.append(worker)
         worker.start()
+        logger.debug(f'{worker.getName()} started')
 
     for worker in workers:
         worker.join()
+        logger.debug(f'{worker.getName()} finished')
 
+    logger.info('Finished calculating vector similarity of query vector vs all records from document')
     return get_top_matches(processed_results)
 
 
@@ -55,9 +62,14 @@ def is_person_already_exists(person_name: str):
 
 
 def has_collection_exceeded_maximum_documents(collection_name: str):
-    if db_handler.count_documents_in_collection(collection_name) >= config.MAX_RECORDS_IN_COLLECTION:
+    num_of_document_in_collection = db_handler.count_documents_in_collection(collection_name)
+    if num_of_document_in_collection >= config.MAX_RECORDS_IN_COLLECTION:
         raise MaximumDocumentsInCollectionError(f'{collection_name} collection has reached its maximum capacity ({config.MAX_RECORDS_IN_COLLECTION})'
-                                           f'{config.MAX_RECORDS_IN_COLLECTION} records')
+                                                f'{config.MAX_RECORDS_IN_COLLECTION} records')
+
+    if num_of_document_in_collection / config.MAX_RECORDS_IN_COLLECTION > config.MAX_RECORDS_THRESHOLD_WARNING:
+        logger.warning(f'Number of documents in collection ({num_of_document_in_collection}) '
+                       f'is close to maximum limit ({config.MAX_RECORDS_IN_COLLECTION})')
 
 
 def insert_document_to_persons_collection(input_data: dict):

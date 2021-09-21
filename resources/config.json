@@ -4,10 +4,12 @@
   "number_of_features": 256,
   "number_of_threads": 10,
   "max_records_in_collection": 10000,
+  "max_records_threshold_warning": 0.9,
   "persons_collection_name": "persons",
   "person_name_column": "person_name",
   "person_features_column": "features",
   "db_name": "DB",
+  "ip": "0.0.0.0",
   "port": 5000,
   "result_field": "result"
 }
