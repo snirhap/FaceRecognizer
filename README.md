@@ -74,3 +74,6 @@ You can run them when server is up using:
 $ python add_10_persons.py
 $ python add_and_search_10_persons.py
 ```
+
+3. Logger
+There is a logger (used in logics.py) that can be defined to work in all classic log levels using an environment variable (DEBUG, INFO, etc.) and can also be defined to be written to an output file.
